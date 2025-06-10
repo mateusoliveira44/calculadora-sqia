@@ -1,0 +1,37 @@
+version: '3.8'
+
+services:
+  sqlserver:
+    image: mcr.microsoft.com/mssql/server:2019-latest
+    environment:
+      - ACCEPT_EULA=Y
+      - SA_PASSWORD=password@08062025
+      - MSSQL_PID=Express
+    ports:
+      - "1433:1433"
+    volumes:
+      - sqlserver-data:/var/opt/mssql
+    networks:
+      - app-network
+
+  api:
+    build:
+      context: ./src/
+      dockerfile: Dockerfile
+    container_name: calculadoraSQIA
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ConnectionStrings__DefaultConnection=Server=sqlserver;Database=calculadoraSQIA;User=sa;Password=password@08062025;TrustServerCertificate=true;
+    networks:
+      - app-network
+    depends_on:
+      - sqlserver
+    ports:
+      - "8080:8080"
+
+volumes:
+  sqlserver-data:
+
+networks:
+  app-network:
+    driver: bridge
